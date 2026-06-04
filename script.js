@@ -222,7 +222,7 @@ function onEachFeature(feature, layer) {
 }
 
 // 10. LOAD GEOJSON
-fetch("https://raw.githubusercontent.com/joshiakriti572-lang/Anu/main/data/nepal-districts-new.geojson")
+fetch("data/nepal-districts-new.geojson")
     .then(res => res.json())
     .then(data => {
 
