@@ -362,3 +362,14 @@ footer{
     border: 1px solid #999;
     vertical-align: middle;
 }
+#webgis {
+    padding: 40px 20px;
+    min-height: 700px;
+}
+
+#map {
+    height: 600px;
+    width: 100%;
+    border-radius: 15px;
+    margin-top: 20px;
+}
