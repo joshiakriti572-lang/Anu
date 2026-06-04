@@ -11,7 +11,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 
 <body>
@@ -286,10 +286,10 @@
         <div class="card">
 
             <ul class="survey-list">
-                <li>Doteli</li>
-                <li>Nepali</li>
-                <li>English</li>
-                <li>Hindi</li>
+                <li>Doteli (Sudurpashchim, Nepal)</li>
+                <li>Nepali(Nepal)</li>
+                <li>English(UK/International) </li>
+                <li>Hindi(India)</li>
             </ul>
 
         </div>
@@ -339,6 +339,13 @@
         </div>
 
     </section>
+    <!-- ================= WEBGIS PROJECT ================= -->
+     <section id="webgis">
+    <h2>Featured WebGIS Project</h2>
+    <p>Nepal District Area Choropleth Map</p>
+
+    <div id="map"></div>
+</section>
 
     <!-- ================= FOOTER ================= -->
 
@@ -350,6 +357,7 @@
         </p>
 
     </footer>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script src="script.js"></script>
 
