@@ -321,3 +321,26 @@ footer{
     }
 
 }
+#map {
+    height: 600px;
+    width: 100%;
+    border-radius: 15px;
+    margin-top: 20px;
+}
+
+#webgis {
+    margin-top: 50px;
+}
+
+.info {
+    padding: 10px;
+    background: white;
+     color: black; 
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    font-size: 14px;
+}
+
+.info h4 {
+    margin: 0 0 5px;
+}
