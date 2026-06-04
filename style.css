@@ -344,3 +344,21 @@ footer{
 .info h4 {
     margin: 0 0 5px;
 }
+.legend {
+    background: white;
+    padding: 10px;
+    line-height: 18px;
+    color: #000;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    font-size: 12px;
+}
+
+.legend i {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    margin-right: 6px;
+    border: 1px solid #999;
+    vertical-align: middle;
+}
