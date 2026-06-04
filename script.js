@@ -137,33 +137,59 @@ console.log(
     "Akriti Joshi Portfolio Loaded Successfully"
 );
 
+
 // ================================
-// WEBGIS MAP
+// WEBGIS MAP SECTION (LEAFLET)
 // ================================
 
-// Create map
+// 1. CREATE MAP
 var map = L.map('map').setView([28.3949, 84.1240], 7);
 
-// OpenStreetMap Basemap
+// 2. ADD BASE MAP (OpenStreetMap)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// Load Nepal District GeoJSON
-fetch('data/nepal-districts-new.geojson')
-    .then(response => response.json())
-    .then(data => {
+// ================================
+// 3. FUNCTION TO GET COLOR (CHOROPLETH)
+// ================================
+function getColor(area) {
+    return area > 0.15 ? '#08306b' :
+           area > 0.10 ? '#2171b5' :
+           area > 0.07 ? '#4292c6' :
+           area > 0.04 ? '#6baed6' :
+                        '#c6dbef';
+}
 
-      // Information Box
-const info = L.control();
+// ================================
+// 4. STYLE EACH DISTRICT
+// ================================
+function style(feature) {
 
-info.onAdd = function(map) {
+    // Safe check (in case data is missing)
+    let area = feature.properties.Shape_Area || 0;
+
+    return {
+        color: '#ffffff',
+        weight: 1,
+        fillOpacity: 0.7,
+        fillColor: getColor(area)
+    };
+}
+
+// ================================
+// 5. HOVER INFO BOX (CONTROL)
+// ================================
+var info = L.control();
+
+info.onAdd = function () {
     this._div = L.DomUtil.create('div', 'info');
     this.update();
     return this._div;
 };
 
-info.update = function(props) {
+// Update info box content
+info.update = function (props) {
     this._div.innerHTML =
         '<h4>District Information</h4>' +
         (props
@@ -174,10 +200,13 @@ info.update = function(props) {
 
 info.addTo(map);
 
-// Highlight District
+// ================================
+// 6. HIGHLIGHT FUNCTION (ON HOVER)
+// ================================
 function highlightFeature(e) {
-    const layer = e.target;
-    console.log(layer.feature.properties);
+
+    var layer = e.target;
+
     layer.setStyle({
         weight: 3,
         color: '#000',
@@ -187,52 +216,90 @@ function highlightFeature(e) {
     info.update(layer.feature.properties);
 }
 
-// Reset Style
+// ================================
+// 7. RESET STYLE (WHEN MOUSE OUT)
+// ================================
 function resetHighlight(e) {
-    districtLayer.resetStyle(e.target);
+    geojsonLayer.resetStyle(e.target);
     info.update();
 }
 
-// Events
+// ================================
+// 8. ON EACH FEATURE (EVENTS)
+// ================================
 function onEachFeature(feature, layer) {
 
+    // Popup on click
     layer.bindPopup(feature.properties.DIST_EN);
 
+    // Hover events
     layer.on({
         mouseover: highlightFeature,
         mouseout: resetHighlight
     });
 }
 
-// District Layer
-const districtLayer = L.geoJSON(data, {
+// ================================
+// 9. LOAD GEOJSON AND ADD TO MAP
+// ================================
+var geojsonLayer;
 
-    style: function(feature) {
+fetch('data/nepal-districts-new.geojson')
+    .then(response => response.json())
+    .then(data => {
 
-        const area = feature.properties.Shape_Area;
+        geojsonLayer = L.geoJSON(data, {
+            style: style,
+            onEachFeature: onEachFeature
+        }).addTo(map);
 
-        return {
-            color: '#ffffff',
-            weight: 1,
-            fillOpacity: 0.7,
+        // Zoom to full Nepal
+        map.fitBounds(geojsonLayer.getBounds());
+        
+// ================================
+// FINAL PROFESSIONAL LEGEND
+// ================================
+var legend = L.control({ position: 'bottomright' });
 
-            fillColor:
-                area > 0.15 ? '#08306b' :
-                area > 0.10 ? '#2171b5' :
-                area > 0.07 ? '#4292c6' :
-                area > 0.04 ? '#6baed6' :
-                '#c6dbef'
-        };
-    },
+legend.onAdd = function (map) {
 
-    onEachFeature: onEachFeature
+    var div = L.DomUtil.create('div', 'info legend');
 
-});
+    div.innerHTML = "<b>District Area Classification</b><br><br>";
 
-districtLayer.addTo(map);
+    var grades = [0, 0.04, 0.07, 0.10, 0.15];
 
-map.fitBounds(districtLayer.getBounds());
+    var labels = [
+        "Very Small Area",
+        "Small Area",
+        "Moderate Area",
+        "Large Area",
+        "Very Large Area"
+    ];
+
+    var colors = [
+        '#c6dbef',
+        '#6baed6',
+        '#4292c6',
+        '#2171b5',
+        '#08306b'
+    ];
+
+    for (var i = 0; i < grades.length; i++) {
+
+        div.innerHTML +=
+            '<i style="background:' + colors[i] + '"></i> ' +
+            labels[i] +
+            ' <span style="font-size:11px; color:gray;">(' +
+            grades[i] + (grades[i + 1] ? ' – ' + grades[i + 1] : '+') +
+            ')</span><br>';
+    }
+
+    return div;
+};
+
+legend.addTo(map);
     })
     .catch(error => {
-        console.error('Error loading GeoJSON:', error);
+        console.log("Error loading GeoJSON:", error);
     });
