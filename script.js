@@ -138,21 +138,23 @@ console.log(
 );
 
 
+
 // ================================
-// WEBGIS MAP SECTION (LEAFLET)
+// WEBGIS MAP (FIXED VERSION)
 // ================================
 
 // 1. CREATE MAP
 var map = L.map('map').setView([28.3949, 84.1240], 7);
 
-// 2. ADD BASE MAP (OpenStreetMap)
+// 2. BASE MAP
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-// ================================
-// 3. FUNCTION TO GET COLOR (CHOROPLETH)
-// ================================
+// 3. GLOBAL VARIABLE (IMPORTANT)
+var geojsonLayer;
+
+// 4. COLOR FUNCTION
 function getColor(area) {
     return area > 0.15 ? '#08306b' :
            area > 0.10 ? '#2171b5' :
@@ -161,25 +163,17 @@ function getColor(area) {
                         '#c6dbef';
 }
 
-// ================================
-// 4. STYLE EACH DISTRICT
-// ================================
+// 5. STYLE
 function style(feature) {
-
-    // Safe check (in case data is missing)
-    let area = feature.properties.Shape_Area || 0;
-
     return {
-        color: '#ffffff',
+        color: "#fff",
         weight: 1,
         fillOpacity: 0.7,
-        fillColor: getColor(area)
+        fillColor: getColor(feature.properties.Shape_Area || 0)
     };
 }
 
-// ================================
-// 5. HOVER INFO BOX (CONTROL)
-// ================================
+// 6. INFO BOX
 var info = L.control();
 
 info.onAdd = function () {
@@ -188,64 +182,48 @@ info.onAdd = function () {
     return this._div;
 };
 
-// Update info box content
 info.update = function (props) {
     this._div.innerHTML =
-        '<h4>District Information</h4>' +
+        "<h4>District Info</h4>" +
         (props
-            ? '<b>District:</b> ' + props.DIST_EN +
-              '<br><b>Area:</b> ' + props.Shape_Area
-            : 'Hover over a district');
+            ? "<b>" + props.DIST_EN + "</b><br>Area: " + props.Shape_Area
+            : "Hover over district");
 };
 
 info.addTo(map);
 
-// ================================
-// 6. HIGHLIGHT FUNCTION (ON HOVER)
-// ================================
+// 7. HIGHLIGHT
 function highlightFeature(e) {
-
     var layer = e.target;
 
     layer.setStyle({
         weight: 3,
-        color: '#000',
+        color: "#000",
         fillOpacity: 0.9
     });
 
     info.update(layer.feature.properties);
 }
 
-// ================================
-// 7. RESET STYLE (WHEN MOUSE OUT)
-// ================================
+// 8. RESET
 function resetHighlight(e) {
     geojsonLayer.resetStyle(e.target);
     info.update();
 }
 
-// ================================
-// 8. ON EACH FEATURE (EVENTS)
-// ================================
+// 9. EVENTS
 function onEachFeature(feature, layer) {
-
-    // Popup on click
     layer.bindPopup(feature.properties.DIST_EN);
 
-    // Hover events
     layer.on({
         mouseover: highlightFeature,
         mouseout: resetHighlight
     });
 }
 
-// ================================
-// 9. LOAD GEOJSON AND ADD TO MAP
-// ================================
-var geojsonLayer;
-
-fetch('data/nepal-districts-new.geojson')
-    .then(response => response.json())
+// 10. LOAD GEOJSON
+fetch("data/nepal-districts-new.geojson")
+    .then(res => res.json())
     .then(data => {
 
         geojsonLayer = L.geoJSON(data, {
@@ -253,53 +231,37 @@ fetch('data/nepal-districts-new.geojson')
             onEachFeature: onEachFeature
         }).addTo(map);
 
-        // Zoom to full Nepal
         map.fitBounds(geojsonLayer.getBounds());
-        
-// ================================
-// FINAL PROFESSIONAL LEGEND
-// ================================
-var legend = L.control({ position: 'bottomright' });
 
-legend.onAdd = function (map) {
+        // 11. LEGEND (MOVED OUTSIDE PROBLEM AREA)
+        var legend = L.control({ position: 'bottomright' });
 
-    var div = L.DomUtil.create('div', 'info legend');
+        legend.onAdd = function () {
 
-    div.innerHTML = "<b>District Area Classification</b><br><br>";
+            var div = L.DomUtil.create('div', 'info legend');
 
-    var grades = [0, 0.04, 0.07, 0.10, 0.15];
+            var grades = [0, 0.04, 0.07, 0.10, 0.15];
 
-    var labels = [
-        "Very Small Area",
-        "Small Area",
-        "Moderate Area",
-        "Large Area",
-        "Very Large Area"
-    ];
+            var colors = [
+                '#c6dbef',
+                '#6baed6',
+                '#4292c6',
+                '#2171b5',
+                '#08306b'
+            ];
 
-    var colors = [
-        '#c6dbef',
-        '#6baed6',
-        '#4292c6',
-        '#2171b5',
-        '#08306b'
-    ];
+            div.innerHTML = "<b>Area Classification</b><br>";
 
-    for (var i = 0; i < grades.length; i++) {
+            for (var i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                    '<i style="background:' + colors[i] + '"></i> ' +
+                    grades[i] + (grades[i + 1] ? ' - ' + grades[i + 1] : '+') +
+                    '<br>';
+            }
 
-        div.innerHTML +=
-            '<i style="background:' + colors[i] + '"></i> ' +
-            labels[i] +
-            ' <span style="font-size:11px; color:gray;">(' +
-            grades[i] + (grades[i + 1] ? ' – ' + grades[i + 1] : '+') +
-            ')</span><br>';
-    }
+            return div;
+        };
 
-    return div;
-};
-
-legend.addTo(map);
+        legend.addTo(map);
     })
-    .catch(error => {
-        console.log("Error loading GeoJSON:", error);
-    });
+    .catch(err => console.log(err));
