@@ -184,9 +184,9 @@ info.onAdd = function () {
 
 info.update = function (props) {
     this._div.innerHTML =
-        "<h4>District Info</h4>" +
+        "<h4>District Information</h4>" +
         (props
-            ? "<b>" + props.DIST_EN + "</b><br>Area: " + props.Shape_Area
+            ? "<b>" + props.DIST_EN + "</b><br>Area Index: " + props.Shape_Area.toFixed(3)+ ' sq. unites'
             : "Hover over district");
 };
 
@@ -250,7 +250,7 @@ fetch("data/nepal-districts-new.json")
                 '#08306b'
             ];
 
-            div.innerHTML = "<b>Area Classification</b><br>";
+            div.innerHTML = "<b>District Area Classification</b><br>";
 
             for (var i = 0; i < grades.length; i++) {
                 div.innerHTML +=
